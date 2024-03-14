@@ -58,6 +58,14 @@ def restore_model(hps, model, checkpoint_path):
         #     if checkpoint_hps.get(k, None) != hps.get(k, None):
         #         print(k, "Checkpoint:", checkpoint_hps.get(k, None), "Ours:", hps.get(k, None))
         checkpoint['model'] = {k[7:] if k[:7] == 'module.' else k: v for k, v in checkpoint['model'].items()}
+        new_dict = dict()
+        for k, v in checkpoint["model"].items():
+            if "prior.transformer._attn_mods" in k:
+                _val = int(k.split(".")[3])
+                if _val >= 36:
+                    continue
+            new_dict[k] = v
+        checkpoint["model"] = new_dict
         model.load_state_dict(checkpoint['model'])
         if 'step' in checkpoint: model.step = checkpoint['step']
 
